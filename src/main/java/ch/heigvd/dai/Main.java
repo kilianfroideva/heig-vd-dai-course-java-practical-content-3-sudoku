@@ -1,27 +1,15 @@
 package ch.heigvd.dai;
 
-import ch.heigvd.dai.commands.Root;
-import java.io.File;
-import picocli.CommandLine;
+import io.javalin.Javalin;
 
 public class Main {
+  public static final int PORT = 1236;
 
   public static void main(String[] args) {
-    // Define command name - source: https://stackoverflow.com/a/11159435
-    String jarFilename =
-        new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getPath())
-            .getName();
+    Javalin app = Javalin.create();
 
-    // Create root command
-    Root root = new Root();
+    app.get("/", ctx -> ctx.result("Hello, world!"));
 
-    // Execute command and get exit code
-    int exitCode =
-        new CommandLine(root)
-            .setCommandName(jarFilename)
-            .setCaseInsensitiveEnumValuesAllowed(true)
-            .execute(args);
-
-    System.exit(exitCode);
+    app.start(PORT);
   }
 }
