@@ -8,21 +8,10 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - traefik_network
-
-  whoami:
-    image: traefik/whoami
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.supersudoku.duckdns.org`)"
-      - "traefik.http.routers.whoami.entrypoints=web"
     networks:
       - traefik_network
 
@@ -37,14 +26,8 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
-      - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
+      - "traefik.http.routers.sudoku.rule=Host(`20.4.71.192`)"
       - "traefik.http.routers.sudoku.entrypoints=web"
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowmethods=GET,POST,PUT,DELETE,OPTIONS"
-      - "traefik.http.middlewares.cors.headers.accesscontrolallowheaders=Content-Type,Authorization"
-      - "traefik.http.middlewares.cors.headers.accesscontrolalloworiginlist=https://supersudoku.duckdns.org,http://supersudoku.duckdns.org"
-      - "traefik.http.middlewares.cors.headers.accesscontrolmaxage=100"
-      - "traefik.http.middlewares.cors.headers.addvaryheader=true"
-      - "traefik.http.routers.sudoku.middlewares=cors"
 
 networks:
   traefik_network:
