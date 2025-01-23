@@ -6,12 +6,12 @@ services:
     container_name: traefik
     command:
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.dashboard.address=:8080"
+      - "--entrypoints.dashboard.address=:8081"
       - "--api.insecure=true"
       - "--providers.docker=true"
     ports:
       - "80:80"       # Mappe le port 80 de l'hôte au port 80 du conteneur
-      - "8080:8080"   # Tableau de bord de Traefik
+      - "8081:8081"   # Tableau de bord de Traefik
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
     networks:
