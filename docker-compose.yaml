@@ -36,6 +36,8 @@ services:
       - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$q8eZFHjF$$Fvmkk//V6Btlaf2i/ju5n/"
 
   sudoku:
+    environment:
+      - JAVALIN_HOST=0.0.0.0
     build: .
     restart: unless-stopped
     networks:
