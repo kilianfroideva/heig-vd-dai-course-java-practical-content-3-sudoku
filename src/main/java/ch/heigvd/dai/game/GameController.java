@@ -31,6 +31,7 @@ public class GameController {
 
             // Store both the initial grid and the Sudoku instance
             newGame.initialGrid = grid;
+            newGame.solutionGrid = sudoku.toString();  // Store the solution grid
             newGame.setSudoku(sudoku);
             newGame.status = GameStatus.WAITING;
             newGame.id = UUID.randomUUID().toString();
@@ -142,6 +143,9 @@ public class GameController {
         }
 
         // Verify and apply the move
+        if (move.value == null || move.value.trim().isEmpty()) {
+            throw new BadRequestResponse("Move value cannot be empty");
+        }
         MoveValidity validity = player.currentGame.verifyMove(move.position, move.value);
 
         // Update game status if completed

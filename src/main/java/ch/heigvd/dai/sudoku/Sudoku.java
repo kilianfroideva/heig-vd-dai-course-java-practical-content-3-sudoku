@@ -69,7 +69,12 @@ public class Sudoku {
         // Convert strings to integers and populate the grid
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                grid[i][j] = hexToInt(stringGrid.charAt(i * size + j));
+                int value = hexToInt(stringGrid.charAt(i * size + j));
+                grid[i][j] = value;
+                // Set mask bit to true for empty cells (value 0)
+                if (value == 0) {
+                    mask.set(i * size + j);
+                }
             }
         }
     }
@@ -182,7 +187,9 @@ public class Sudoku {
     public void applyMove(String position, String value) {
         int row = position.charAt(0) - 'A';  // B -> 1
         int col = Integer.parseInt(position.substring(1)) - 1;  // 12 -> 11
-        int valueInt = Integer.parseInt(value);
+
+        int valueInt;
+        valueInt = Integer.parseInt(value);
         grid[row][col] = valueInt;
         mask.clear(row * size + col);
     }
@@ -200,9 +207,9 @@ public class Sudoku {
         }
 
         // Check if not already placed
-        if (!mask.get(row * size + col)) {
-            return ALREADY_PLACED;
-        }
+    if (!mask.get(row * size + col)) {
+        return ALREADY_PLACED;
+    }
 
         // Check if correct
         if (valueInt != grid[row][col]) {

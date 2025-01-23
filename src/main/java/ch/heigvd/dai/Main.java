@@ -13,7 +13,7 @@ public class Main {
       config.jetty.defaultHost = "0.0.0.0";
       config.bundledPlugins.enableCors(cors -> {
         cors.addRule(it -> {
-          it.allowHost("https://supersudoku.duckdns.org","http://supersudoku.duckdns.org");
+          it.allowHost("https://localhost:1236", "http://localhost:1236", "http://localhost");
         });
       });
     });

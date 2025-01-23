@@ -21,12 +21,12 @@ services:
       - JAVALIN_HOST=0.0.0.0
     networks:
       - traefik_network
-    expose:
-      - "1236"
+    ports:
+      - "1236:1236"
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
-      - "traefik.http.routers.sudoku.rule=Host(`20.4.71.192`)"
+      - "traefik.http.routers.sudoku.rule=Host(`localhost`)"
       - "traefik.http.routers.sudoku.entrypoints=web"
 
 networks:

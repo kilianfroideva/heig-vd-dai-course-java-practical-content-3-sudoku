@@ -20,6 +20,7 @@ public class Game {
     public GameStatus status;
 
     public String initialGrid;
+    public String solutionGrid;
     public List<Player> players = new ArrayList<>();
     public String winnerId;
     public List<Move> moves = new ArrayList<>();
