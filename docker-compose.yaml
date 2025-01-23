@@ -1,36 +1,24 @@
-version: "3.8"
-
-networks:
-  traefik_network:
-    name: traefik_network
+version: "3"
 
 services:
   traefik:
-    image: traefik:${TRAEFIK_IMAGE_VERSION:-latest}
-    restart: unless-stopped
-    networks:
-      - traefik_network
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./letsencrypt:/letsencrypt"
+    image: traefik:v2.10
     command:
-      - "--api.dashboard=${TRAEFIK_ENABLE_DASHBOARD:-false}"
+      - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=traefik_network"
-      - "--entrypoints.http.address=:80"
-      - "--entrypoints.https.address=:443"
-      - "--entrypoints.http.http.redirections.entrypoint.to=https"
-      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
-      - "--entrypoints.http.http.redirections.entrypoint.permanent=true"
-      - "--entrypoints.https.http.tls=true"
-      - "--entrypoints.https.http.tls.certresolver=letsencrypt"
-      - "--certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL}"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  whoami:
+    image: traefik/whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.supersudoku.duckdns.org`)"
+      - "traefik.http.routers.whoami.entrypoints=web"
     labels:
       - "traefik.enable=true"
       # Dashboard configuration
