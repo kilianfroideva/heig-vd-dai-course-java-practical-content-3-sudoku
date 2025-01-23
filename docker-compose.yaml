@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.10
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"  # Enable dashboard
+      - "--api.insecure=false"  # Secure the dashboard
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "letsencrypt:/letsencrypt"
+    labels:
+      - "traefik.enable=true"
+      # Dashboard configuration
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.supersudoku.duckdns.org`)"
+      - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+
+  sudoku:
+    build: .
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sudoku.rule=Host(`traefik.supersudoku.duckdns.org`)"
+      - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
+      - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
+
+volumes:
+  letsencrypt:
