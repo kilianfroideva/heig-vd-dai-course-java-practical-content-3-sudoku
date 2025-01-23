@@ -1,24 +1,22 @@
-version: "3.8"
+version: '3'
 
 services:
-  whoami-on-port-80:
-    image: traefik/whoami:${WHOAMI_IMAGE_VERSION:-latest}
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
     command:
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.dashboard.address=:8080"
       - "--api.insecure=true"
       - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:8081"
-      - "--entrypoint.dashboard.adress=:8080"
-      - "--log.level=DEBUG"
     ports:
-      - "8081:8081"
-      - "8080:8080"
+      - "80:80"       # Mappe le port 80 de l'hôte au port 80 du conteneur
+      - "8080:8080"   # Tableau de bord de Traefik
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - mynetwork
 
-  app:
-    image: nginx
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.app.rule=Host('localhost')"
-      - "traefik.http.services.app.loadbalancer.server.port=80"
+networks:
+  mynetwork:
+    driver: bridge
