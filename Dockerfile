@@ -1,21 +1,10 @@
-# Use Temurin Java 21 as base image
-FROM eclipse-temurin:21-jdk
-
-# Set working directory
+FROM maven:3.9.6-eclipse-temurin-21-jammy AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package
 
-COPY target/java-sudoku-1.0-SNAPSHOT.jar /app/java-sudoku-1.0-SNAPSHOT.jar
-
-# Copy the dataset into the image
-COPY dataset /app/dataset
-
-# Expose the required port
+FROM eclipse-temurin:21-jre-jammy
+WORKDIR /app
+COPY --from=build /app/target/sudoku-1.0-SNAPSHOT.jar app.jar
 EXPOSE 1236
-
-# Set the entry point to run the application
-ENTRYPOINT ["java", "-jar", "/app/java-sudoku-1.0-SNAPSHOT.jar"]
-
-#To run client on localhost: docker run -it --network="host" sudoku-app client --host=127.0.0.1
-#To run server: docker run -p 1236:1236 sudoku-app server
-
-#Dont forget to build: docker build -t sudoku-app .
+CMD ["java", "-jar", "app.jar"]
