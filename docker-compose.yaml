@@ -1,33 +1,36 @@
 version: "3.8"
 
 networks:
-  web:
-    name: web
+  traefik_network:
+    name: traefik_network
 
 services:
   traefik:
-    image: traefik:v2.10
+    image: traefik:${TRAEFIK_IMAGE_VERSION:-latest}
     restart: unless-stopped
     networks:
-      - web
+      - traefik_network
     ports:
-      - "0.0.0.0:80:80"
-      - "0.0.0.0:443:443"
+      - "80:80"
+      - "443:443"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "letsencrypt:/letsencrypt"
+      - "./letsencrypt:/letsencrypt"
     command:
-      - "--log.level=DEBUG"
+      - "--api.dashboard=${TRAEFIK_ENABLE_DASHBOARD:-false}"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--providers.docker.network=web"
-      - "--serversTransport.insecureSkipVerify=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
-      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-      - "--certificatesresolvers.myresolver.acme.email=kilian.froideva@hes-so.ch"
+      - "--providers.docker.network=traefik_network"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--entrypoints.http.http.redirections.entrypoint.to=https"
+      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.http.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.https.http.tls=true"
+      - "--entrypoints.https.http.tls.certresolver=letsencrypt"
+      - "--certificatesresolvers.letsencrypt.acme.email=${TRAEFIK_ACME_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
     labels:
       - "traefik.enable=true"
       # Dashboard configuration
