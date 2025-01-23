@@ -1,4 +1,4 @@
-version: "3"
+version: "3.8"
 
 services:
   whoami-on-port-80:
@@ -8,34 +8,17 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoint.dashboard.adress=:8080"
+      - "--log.level=DEBUG"
     ports:
+      - "80:80"
       - "80:80"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    networks:
-      - traefik_network
 
-  whoami-on-port-443:
-    image: traefik/whoami:${WHOAMI_IMAGE_VERSION:-latest}
-    ports:
-      - 443:80
-
-
-  sudoku:
-    build: .
-    environment:
-      - JAVALIN_HOST=0.0.0.0
-    networks:
-      - traefik_network
-    expose:
-      - "1236"
+  app:
+    image: nginx
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
-      - "traefik.http.routers.sudoku.rule=Host(`20.4.71.192`)"
-      - "traefik.http.routers.sudoku.entrypoints=web"
-
-
-
-networks:
-  traefik_network:
+      - "traefik.http.routers.app.rule=Host('localhost')"
+      - "traefik.http.services.app.loadbalancer.server.port=80"
