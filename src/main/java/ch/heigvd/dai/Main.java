@@ -15,10 +15,10 @@ public class Main {
 
     Javalin app = Javalin.create(config -> {
       config.jetty.defaultHost = "0.0.0.0";
-      config.plugins.enableCors(cors -> {
-        cors.add(it -> {
-          it.allowHost("https://supersudoku.duckdns.org");
-          it.allowHost("http://supersudoku.duckdns.org");
+      config.staticFiles.enableWebjars();
+      config.bundledPlugins.enableCors(cors -> {
+        cors.addRule(it -> {
+          it.allowHost("https://supersudoku.duckdns.org","http://supersudoku.duckdns.org");
         });
       });
     });
