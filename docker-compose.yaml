@@ -8,10 +8,15 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+    networks:
+      - traefik_network
 
   whoami:
     image: traefik/whoami
@@ -19,15 +24,8 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.whoami.rule=Host(`whoami.supersudoku.duckdns.org`)"
       - "traefik.http.routers.whoami.entrypoints=web"
-    labels:
-      - "traefik.enable=true"
-      # Dashboard configuration
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.supersudoku.duckdns.org`)"
-      - "traefik.http.routers.dashboard.service=api@internal"
-      - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
-      - "traefik.http.routers.dashboard.entrypoints=websecure"
-      - "traefik.http.routers.dashboard.middlewares=auth"
-      - "traefik.http.middlewares.auth.basicauth.users=admin:$$apr1$$q8eZFHjF$$Fvmkk//V6Btlaf2i/ju5n/"
+    networks:
+      - traefik_network
 
   sudoku:
     environment:
@@ -40,46 +38,15 @@ services:
       - "1236"
     labels:
       - "traefik.enable=true"
-      # HTTP Router
       - "traefik.http.routers.sudoku-http.rule=Host(`supersudoku.duckdns.org`)"
       - "traefik.http.routers.sudoku-http.entrypoints=web"
-      # HTTPS Router
       - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
       - "traefik.http.routers.sudoku.entrypoints=websecure"
       - "traefik.http.routers.sudoku.tls=true"
       - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
-      # Service configuration
-      - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
 
-  whoami:
-    image: traefik/whoami:${WHOAMI_IMAGE_VERSION:-latest}
-    networks:
-      - traefik_network
-    expose:
-      - 80
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik_network"
-      - "traefik.http.routers.whoami.entrypoints=websecure"
-      - "traefik.http.routers.whoami.rule=Host(`${WHOAMI_DOMAIN}`)"
-      - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
-
-  whoami-sticky:
-    image: traefik/whoami:${WHOAMI_IMAGE_VERSION:-latest}
-    networks:
-      - traefik_network
-    expose:
-      - 80
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=traefik_network"
-      - "traefik.http.routers.whoami-sticky.entrypoints=websecure"
-      - "traefik.http.routers.whoami-sticky.rule=Host(`${WHOAMI_STICKY_DOMAIN}`)"
-      - "traefik.http.routers.whoami-sticky.tls=true"
-      - "traefik.http.routers.whoami-sticky.tls.certresolver=letsencrypt"
-      - "traefik.http.services.whoami-sticky.loadbalancer.sticky=true"
-      - "traefik.http.services.whoami-sticky.loadbalancer.sticky.cookie.name=whoami_cookie"
-      - "traefik.http.services.whoami-sticky.loadbalancer.sticky.cookie.httpOnly=true"
 volumes:
   letsencrypt:
+
+networks:
+  traefik_network:
