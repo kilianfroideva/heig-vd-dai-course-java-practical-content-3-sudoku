@@ -1,9 +1,7 @@
 package ch.heigvd.dai;
 
-import com.fasterxml.jackson.databind.*;
 import ch.heigvd.dai.game.*;
 import io.javalin.Javalin;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,22 +9,13 @@ public class Main {
   public static final int PORT = 1236;
 
   public static void main(String[] args) {
-    ObjectMapper objectMapper = new ObjectMapper()
-        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
-        .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
-        .enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
-
     Javalin app = Javalin.create(config -> {
       config.jetty.defaultHost = "0.0.0.0";
-      config.staticFiles.enableWebjars();
       config.bundledPlugins.enableCors(cors -> {
         cors.addRule(it -> {
           it.allowHost("https://supersudoku.duckdns.org","http://supersudoku.duckdns.org");
         });
       });
-
-      // Add error handling
-      config.bundledPlugins.enableDevLogging();
     });
 
     // Add global error handler

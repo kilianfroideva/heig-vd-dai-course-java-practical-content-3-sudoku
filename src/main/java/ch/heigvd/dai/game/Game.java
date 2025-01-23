@@ -9,6 +9,7 @@ public class Game {
     public String id;
     public GameType type;
     public Difficulty difficulty;
+
     public GameStatus status;
     public String initialGrid;
     public List<Player> players = new ArrayList<>();
@@ -17,7 +18,11 @@ public class Game {
     public Map<String, String> cellOwners = new HashMap<>();
     public Map<String, Integer> playerScores = new HashMap<>();
 
-    public Sudoku sudoku;
+    @JsonIgnore
+    private Sudoku sudoku;
+
+    // Default constructor for Jackson
+    public Game() {}
 
     // Getters and setters
     public GameType getType() {
