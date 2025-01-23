@@ -10,21 +10,22 @@ services:
     restart: unless-stopped
     networks:
       - web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "letsencrypt:/letsencrypt"
     command:
       - "--log.level=DEBUG"
-      - "--api.dashboard=true"
-      - "--api.insecure=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      - "--providers.docker.network=web"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.myresolver.acme.email=your-email@example.com"
-      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
     ports:
       - "80:80"
       - "443:443"
@@ -48,13 +49,20 @@ services:
     restart: unless-stopped
     networks:
       - web
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
-        - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
-        - "traefik.http.routers.sudoku.entrypoints=websecure"
-        - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
-        - "traefik.http.routers.sudoku.service=sudoku"
+    expose:
+      - "1236"
+    labels:
+      - "traefik.enable=true"
+      # HTTP Router
+      - "traefik.http.routers.sudoku-http.rule=Host(`supersudoku.duckdns.org`)"
+      - "traefik.http.routers.sudoku-http.entrypoints=web"
+      # HTTPS Router
+      - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
+      - "traefik.http.routers.sudoku.entrypoints=websecure"
+      - "traefik.http.routers.sudoku.tls=true"
+      - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
+      # Service configuration
+      - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
 
 volumes:
   letsencrypt:
