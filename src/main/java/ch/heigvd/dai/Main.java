@@ -13,7 +13,9 @@ public class Main {
     ObjectMapper objectMapper = new ObjectMapper()
         .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 
-    Javalin app = Javalin.create();
+    Javalin app = Javalin.create(config -> {
+      config.jetty.defaultHost = "0.0.0.0";
+    });
 
     ConcurrentHashMap<String, Game> games = new ConcurrentHashMap<>();
     GameController gameController = new GameController(games);
