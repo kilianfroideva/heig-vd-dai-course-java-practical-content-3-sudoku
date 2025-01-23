@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
 
 public class Game {
-    public int size;
     public String id;
+    public GameType type;
     public Difficulty difficulty;
     public GameStatus status;
     public String initialGrid;
@@ -16,19 +16,17 @@ public class Game {
     public List<Move> moves = new ArrayList<>();
     public Map<String, String> cellOwners = new HashMap<>();
     public Map<String, Integer> playerScores = new HashMap<>();
-    public GameType type;
 
-    @JsonIgnore
-    private Sudoku sudoku;
+    public Sudoku sudoku;
 
-    // Constructor
-    public Game() {}
-
-    public Game(int size, Difficulty difficulty) {
-        this.size = size;
-        this.difficulty = difficulty;
+    // Getters and setters
+    public GameType getType() {
+        return type;
     }
 
+    public void setType(GameType type) {
+        this.type = type;
+    }
 
     public Difficulty getDifficulty() {
         return difficulty;

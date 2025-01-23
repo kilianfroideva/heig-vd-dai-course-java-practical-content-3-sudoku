@@ -1,7 +1,6 @@
 package ch.heigvd.dai;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
 import ch.heigvd.dai.game.*;
 import io.javalin.Javalin;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,7 +10,9 @@ public class Main {
 
   public static void main(String[] args) {
     ObjectMapper objectMapper = new ObjectMapper()
-        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+        .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
+        .enable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING)
+        .enable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
 
     Javalin app = Javalin.create(config -> {
       config.jetty.defaultHost = "0.0.0.0";
