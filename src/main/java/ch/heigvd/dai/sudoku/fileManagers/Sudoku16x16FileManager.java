@@ -6,14 +6,14 @@ import java.util.Random;
 import java.util.List;
 
 public class Sudoku16x16FileManager  {
-    private static final String DATASET_PATH = "/app/dataset/16X16-Sudoku-Dataset/16x16Dataset.csv";
+    private static final String DATASET_PATH = "dataset/16X16-Sudoku-Dataset/16x16Dataset.csv";
 
     /**
      * Reads a random puzzle from the 16x16 dataset
      * @return String[] containing [puzzle, solution]
      * @throws IOException if file cannot be read
      */
-    public static String[] getRandomPuzzle() throws IOException {
+    public String[] getRandomPuzzle() throws IOException {
         // Read all lines from the file
         List<String> allLines = Files.readAllLines(Paths.get(DATASET_PATH));
 

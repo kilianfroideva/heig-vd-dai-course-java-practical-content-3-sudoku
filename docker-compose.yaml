@@ -31,7 +31,7 @@ services:
     restart: unless-stopped
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sudoku.rule=Host(`traefik.supersudoku.duckdns.org`)"
+      - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
       - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
       - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
 

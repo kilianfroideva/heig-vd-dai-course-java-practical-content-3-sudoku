@@ -1,4 +1,6 @@
 package ch.heigvd.dai.sudoku;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.BitSet;
 import java.io.*;
 
@@ -15,11 +17,14 @@ import static ch.heigvd.dai.sudoku.enums.MoveValidity.*;
 
 public class Sudoku {
 
-    private int size;
-    private int[][] grid;
-    private BitSet mask;
+    @JsonIgnore private int size;
+    @JsonIgnore private int[][] grid;
+    @JsonIgnore private BitSet mask;
+    public int getValue(int row, int col) {
+        return grid[row][col];
+    }
 
-    int hexToInt(char c) {
+    public int hexToInt(char c) {
         // Check if the character is a digit (0-9)
         if (c >= '0' && c <= '9') {
             return c - '0';
@@ -36,7 +41,7 @@ public class Sudoku {
         throw new IllegalArgumentException("Invalid hexadecimal character: " + c);
     }
 
-    char intToHex(int i) {
+    public char intToHex(int i) {
         // Check if the integer is within the valid range (0-16)
         if (i >= 0 && i <= 9) {
             return (char) (i + '0');
@@ -69,6 +74,9 @@ public class Sudoku {
         }
     }
 
+    public int getSize() {
+        return size;
+    }
     public Sudoku(int new_size){
         size = new_size;
         grid = new int[size][size];
