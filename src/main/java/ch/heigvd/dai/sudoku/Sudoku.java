@@ -1,4 +1,6 @@
 package ch.heigvd.dai.sudoku;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.BitSet;
 import java.io.*;
 
@@ -15,11 +17,14 @@ import static ch.heigvd.dai.sudoku.enums.MoveValidity.*;
 
 public class Sudoku {
 
-    private int size;
-    private int[][] grid;
-    private BitSet mask;
+    @JsonIgnore private int size;
+    @JsonIgnore private int[][] grid;
+    @JsonIgnore private BitSet mask;
+    public int getValue(int row, int col) {
+        return grid[row][col];
+    }
 
-    int hexToInt(char c) {
+    public int hexToInt(char c) {
         // Check if the character is a digit (0-9)
         if (c >= '0' && c <= '9') {
             return c - '0';
@@ -36,7 +41,7 @@ public class Sudoku {
         throw new IllegalArgumentException("Invalid hexadecimal character: " + c);
     }
 
-    char intToHex(int i) {
+    public char intToHex(int i) {
         // Check if the integer is within the valid range (0-16)
         if (i >= 0 && i <= 9) {
             return (char) (i + '0');
@@ -64,11 +69,19 @@ public class Sudoku {
         // Convert strings to integers and populate the grid
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                grid[i][j] = hexToInt(stringGrid.charAt(i * size + j));
+                int value = hexToInt(stringGrid.charAt(i * size + j));
+                grid[i][j] = value;
+                // Set mask bit to true for empty cells (value 0)
+                if (value == 0) {
+                    mask.set(i * size + j);
+                }
             }
         }
     }
 
+    public int getSize() {
+        return size;
+    }
     public Sudoku(int new_size){
         size = new_size;
         grid = new int[size][size];
@@ -174,7 +187,9 @@ public class Sudoku {
     public void applyMove(String position, String value) {
         int row = position.charAt(0) - 'A';  // B -> 1
         int col = Integer.parseInt(position.substring(1)) - 1;  // 12 -> 11
-        int valueInt = Integer.parseInt(value);
+
+        int valueInt;
+        valueInt = Integer.parseInt(value);
         grid[row][col] = valueInt;
         mask.clear(row * size + col);
     }
@@ -192,9 +207,9 @@ public class Sudoku {
         }
 
         // Check if not already placed
-        if (!mask.get(row * size + col)) {
-            return ALREADY_PLACED;
-        }
+    if (!mask.get(row * size + col)) {
+        return ALREADY_PLACED;
+    }
 
         // Check if correct
         if (valueInt != grid[row][col]) {

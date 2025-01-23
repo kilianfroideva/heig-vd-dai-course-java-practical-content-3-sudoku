@@ -9,7 +9,7 @@ public class Sudoku9x9FileManager {
 
     public String getRandomPuzzle(Difficulty difficulty) throws IOException {
         // Define the base path for the dataset
-        String basePath = "/app/dataset/sudoku-exchange-puzzle-bank/" + switch (difficulty) {
+        String basePath = "dataset/sudoku-exchange-puzzle-bank/" + switch (difficulty) {
             case EASY -> "easy.txt";
             case MEDIUM -> "medium.txt";
             case HARD -> "hard.txt";
@@ -37,10 +37,15 @@ public class Sudoku9x9FileManager {
 
             // Close the file
             file.close();
-            return randomLine.substring(13,13+81);
+            if (randomLine == null) {
+                throw new IOException("Could not read puzzle from file");
+            }
+            if (randomLine == null) {
+                throw new IOException("Could not read puzzle from file");
+            }
+            return randomLine.substring(13, 13+81);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IOException("Error reading puzzle: " + e.getMessage(), e);
         }
-        return null;
     }
 }
