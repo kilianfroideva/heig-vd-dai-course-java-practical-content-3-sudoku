@@ -25,6 +25,7 @@ services:
       - "traefik.http.routers.dashboard.rule=Host(`traefik.supersudoku.duckdns.org`)"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls.certresolver=myresolver"
+      - "traefik.http.routers.dashboard.entrypoints=websecure"
 
   sudoku:
     build: .
@@ -34,6 +35,12 @@ services:
       - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
       - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
       - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
+      - "traefik.http.routers.sudoku.entrypoints=websecure"
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.sudoku-http.rule=Host(`supersudoku.duckdns.org`)"
+      - "traefik.http.routers.sudoku-http.entrypoints=web"
+      - "traefik.http.routers.sudoku-http.middlewares=redirect-to-https"
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
 volumes:
   letsencrypt:

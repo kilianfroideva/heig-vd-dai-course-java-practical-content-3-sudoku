@@ -15,6 +15,12 @@ public class Main {
 
     Javalin app = Javalin.create(config -> {
       config.jetty.defaultHost = "0.0.0.0";
+      config.plugins.enableCors(cors -> {
+        cors.add(it -> {
+          it.allowHost("https://supersudoku.duckdns.org");
+          it.allowHost("http://supersudoku.duckdns.org");
+        });
+      });
     });
 
     ConcurrentHashMap<String, Game> games = new ConcurrentHashMap<>();
