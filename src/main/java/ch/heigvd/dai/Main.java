@@ -3,6 +3,8 @@ package ch.heigvd.dai;
 import com.fasterxml.jackson.databind.*;
 import ch.heigvd.dai.game.*;
 import io.javalin.Javalin;
+
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Main {
@@ -22,6 +24,16 @@ public class Main {
           it.allowHost("https://supersudoku.duckdns.org","http://supersudoku.duckdns.org");
         });
       });
+
+      // Add error handling
+      config.bundledPlugins.enableDevLogging();
+    });
+
+    // Add global error handler
+    app.exception(Exception.class, (e, ctx) -> {
+        ctx.status(500);
+        ctx.json(Map.of("error", e.getMessage()));
+        e.printStackTrace();
     });
 
     ConcurrentHashMap<String, Game> games = new ConcurrentHashMap<>();
