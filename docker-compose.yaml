@@ -18,10 +18,13 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=web"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.myresolver.acme.email=your-email@example.com"
+      - "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
     ports:
       - "80:80"
       - "443:443"
@@ -45,23 +48,13 @@ services:
     restart: unless-stopped
     networks:
       - web
-    labels:
-      - "traefik.enable=true"
-      # HTTP Configuration
-      - "traefik.http.routers.sudoku-http.rule=Host(`supersudoku.duckdns.org`)"
-      - "traefik.http.routers.sudoku-http.entrypoints=web"
-      - "traefik.http.routers.sudoku-http.service=sudoku"
-      # HTTPS Configuration
-      - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
-      - "traefik.http.routers.sudoku.entrypoints=websecure"
-      - "traefik.http.routers.sudoku.tls=true"
-      - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
-      - "traefik.http.routers.sudoku.service=sudoku"
-      # Service configuration
-      - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
-      # Middleware for HTTP to HTTPS redirect
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.sudoku-http.middlewares=redirect-to-https@docker"
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
+        - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
+        - "traefik.http.routers.sudoku.entrypoints=websecure"
+        - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
+        - "traefik.http.routers.sudoku.service=sudoku"
 
 volumes:
   letsencrypt:
