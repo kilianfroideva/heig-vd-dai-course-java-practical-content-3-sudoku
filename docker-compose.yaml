@@ -11,14 +11,17 @@ services:
     networks:
       - web
     command:
-      - "--api.dashboard=true" # Enable dashboard
-      - "--api.insecure=false" # Secure the dashboard
+      - "--log.level=DEBUG"
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=web"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.myresolver.acme.email=your-email@example.com"
     ports:
       - "80:80"
       - "443:443"
@@ -44,15 +47,21 @@ services:
       - web
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
-      - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
-      - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
-      - "traefik.http.routers.sudoku.entrypoints=websecure"
-      # HTTP to HTTPS redirect
+      # HTTP Configuration
       - "traefik.http.routers.sudoku-http.rule=Host(`supersudoku.duckdns.org`)"
       - "traefik.http.routers.sudoku-http.entrypoints=web"
-      - "traefik.http.routers.sudoku-http.middlewares=redirect-to-https"
+      - "traefik.http.routers.sudoku-http.service=sudoku"
+      # HTTPS Configuration
+      - "traefik.http.routers.sudoku.rule=Host(`supersudoku.duckdns.org`)"
+      - "traefik.http.routers.sudoku.entrypoints=websecure"
+      - "traefik.http.routers.sudoku.tls=true"
+      - "traefik.http.routers.sudoku.tls.certresolver=myresolver"
+      - "traefik.http.routers.sudoku.service=sudoku"
+      # Service configuration
+      - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
+      # Middleware for HTTP to HTTPS redirect
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.sudoku-http.middlewares=redirect-to-https@docker"
 
 volumes:
   letsencrypt:
