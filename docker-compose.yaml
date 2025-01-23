@@ -10,10 +10,19 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
     ports:
-      - "80:80"       # Mappe le port 80 de l'hôte au port 80 du conteneur
-      - "8081:8081"   # Tableau de bord de Traefik
+      - "80:80"
+      - "8081:8081"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - mynetwork
+
+  whoami:
+    image: traefik/whoami
+    container_name: whoami
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.whoami.rule=Host(`localhost`)"
     networks:
       - mynetwork
 
