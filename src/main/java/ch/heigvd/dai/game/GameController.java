@@ -20,7 +20,7 @@ public class GameController {
 
         try {
             // Create new Sudoku instance based on type
-            int size = newGame.type == GameType.SUDOKU_9X9 ? 9 : 16;
+            int size = newGame.type.getSize();
             Sudoku sudoku = new Sudoku(size);
             String grid = sudoku.importSudoku(newGame.type);
 
@@ -106,7 +106,7 @@ public class GameController {
 
         newPlayer.id = UUID.randomUUID().toString();
         newPlayer.currentGame = new Sudoku(game.initialGrid,
-                String.valueOf(game.type == GameType.SUDOKU_9X9 ? 9 : 16));
+                String.valueOf(game.type.getSize()));
         newPlayer.startTime = System.currentTimeMillis();
 
         game.players.add(newPlayer);
@@ -138,7 +138,7 @@ public class GameController {
 
         if (player.currentGame == null) {
             player.currentGame = new Sudoku(game.initialGrid,
-                String.valueOf(game.type == GameType.SUDOKU_9X9 ? 9 : 16));
+                String.valueOf(game.type.getSize()));
         }
 
         // Verify and apply the move
