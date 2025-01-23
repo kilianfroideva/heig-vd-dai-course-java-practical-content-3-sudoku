@@ -1,5 +1,7 @@
 # Sudoku Game
 
+## Auteurs
+Kilian Froidevaux & Nicolas Bovard
 ## Overview
 
 The Sudoku Game enables multiplayer Sudoku gameplay over a TCP network connection, supporting dynamic grid sizes and concurrent client interactions.
@@ -62,6 +64,18 @@ the updates:
 # Reboot the virtual machine
 sudo reboot
 ```
+## DNS Configuration
+
+- Domaine principal: https://supersudoku.duckdns.org
+- Port: 1236
+
+### Domain and Server
+- Connect on Duckdns.org
+- Add your sub domain (ex : https://your-sudoku.duckdns.org)
+- configure server to respond with this domain
+- Open port 1236
+
+
 
 ## Docker Usage
 
@@ -116,6 +130,23 @@ docker run -p 1236:1236 sudoku-app server
 docker tag sudoku-app username/sudoku-app
 docker push username/sudoku-app
 ```
+
+## API configurations
+
+- POST /games : Create a new game
+- POST /games/gameId/join : join a lobby
+- PUT /games/gamesId/players/playersId : Make a move
+- GET /games/gameId : get the actual state of the game
+- app.get("/games", gameController::getAll); GET /games : get all the lobbies
+- 
+### Exemple curl
+
+````bash
+curl -X POST https://supersudoku.duckdns.org:1236/games \
+-t 'type:SUDOKU_9X9' \
+-d 'difficulty:MEDIUM'
+````
+
 
 ## Game Commands
 
@@ -223,6 +254,6 @@ I  |     8 |     1 |   4 2
 
 - **TCP/IP** network
 - **UTF-8** compatible client
-- - **Java Development Kit (JDK) 8+**
+- **Java Development Kit (JDK) 8+**
 - **Maven** (for building the project)
 - **Git** (for cloning the repository)
