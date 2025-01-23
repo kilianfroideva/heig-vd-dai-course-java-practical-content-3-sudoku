@@ -3,6 +3,7 @@ import java.util.BitSet;
 import java.io.*;
 
 import ch.heigvd.dai.sudoku.enums.Difficulty;
+import ch.heigvd.dai.sudoku.enums.GameType;
 import ch.heigvd.dai.sudoku.enums.MoveValidity;
 import ch.heigvd.dai.sudoku.fileManagers.Sudoku16x16FileManager;
 import ch.heigvd.dai.sudoku.fileManagers.Sudoku9x9FileManager;
@@ -151,10 +152,8 @@ public class Sudoku {
         return importSudoku9x9(MEDIUM);
     }
 
-    public String importSudoku(String new_size_string) throws IOException {
-        int new_size = Integer.parseInt(new_size_string);
-
-        switch (new_size) {
+    public String importSudoku(GameType type) throws IOException {
+        switch (type.getSize()) {
             case 9:
                 try {
                     return importSudoku9x9();  // Default difficulty MEDIUM
@@ -168,7 +167,7 @@ public class Sudoku {
                     throw new IOException("Error importing 16x16 Sudoku puzzle", e);
                 }
             default:
-                throw new IllegalArgumentException("Unsupported Sudoku size: " + new_size);
+                throw new IllegalArgumentException("Unsupported Sudoku size: " + type.getSize());
         }
     }
 
