@@ -47,7 +47,7 @@ services:
     build: .
     restart: unless-stopped
     networks:
-      - web
+      - traefik_network
     expose:
       - "1236"
     labels:
@@ -63,5 +63,35 @@ services:
       # Service configuration
       - "traefik.http.services.sudoku.loadbalancer.server.port=1236"
 
+  whoami:
+    image: traefik/whoami:${WHOAMI_IMAGE_VERSION:-latest}
+    networks:
+      - traefik_network
+    expose:
+      - 80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_network"
+      - "traefik.http.routers.whoami.entrypoints=websecure"
+      - "traefik.http.routers.whoami.rule=Host(`${WHOAMI_DOMAIN}`)"
+      - "traefik.http.routers.whoami.tls=true"
+      - "traefik.http.routers.whoami.tls.certresolver=letsencrypt"
+
+  whoami-sticky:
+    image: traefik/whoami:${WHOAMI_IMAGE_VERSION:-latest}
+    networks:
+      - traefik_network
+    expose:
+      - 80
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_network"
+      - "traefik.http.routers.whoami-sticky.entrypoints=websecure"
+      - "traefik.http.routers.whoami-sticky.rule=Host(`${WHOAMI_STICKY_DOMAIN}`)"
+      - "traefik.http.routers.whoami-sticky.tls=true"
+      - "traefik.http.routers.whoami-sticky.tls.certresolver=letsencrypt"
+      - "traefik.http.services.whoami-sticky.loadbalancer.sticky=true"
+      - "traefik.http.services.whoami-sticky.loadbalancer.sticky.cookie.name=whoami_cookie"
+      - "traefik.http.services.whoami-sticky.loadbalancer.sticky.cookie.httpOnly=true"
 volumes:
   letsencrypt:
