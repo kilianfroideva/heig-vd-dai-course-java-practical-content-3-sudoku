@@ -34,6 +34,19 @@ print_board() {
 }
 
 echo -e "${BLUE}Starting Sudoku Battle...${NC}"
+# Function to validate move response
+validate_response() {
+    local response=$1
+    if [ -z "$response" ]; then
+        echo "ERROR: Empty response"
+        return 1
+    fi
+    if ! echo "$response" | python3 -c "import sys, json; json.load(sys.stdin)" &>/dev/null; then
+        echo "ERROR: Invalid JSON response: $response"
+        return 1
+    fi
+    return 0
+}
 
 # 1. Create new game
 echo -e "\n${GREEN}1. Creating new game...${NC}"
@@ -73,7 +86,7 @@ for ((i=0; i<81; i++)); do
         row_letter=$(printf "\\$(printf '%03o' $((65 + row)))")
         position="${row_letter}$((col + 1))"
         correct_value="${SOLUTION_GRID:$i:1}"
-        
+
         # Randomly choose player
         if [ $((RANDOM % 2)) -eq 0 ]; then
             PLAYER="Player 1"
@@ -84,36 +97,47 @@ for ((i=0; i<81; i++)); do
             PLAYER_ID=$PLAYER2_ID
             COLOR=$BLUE
         fi
-        
+
         echo -e "\n${COLOR}$PLAYER trying position $position with value $correct_value${NC}"
-        
+
+        # Convert the value to string to ensure proper JSON formatting
         RESPONSE=$(curl -s -X POST "http://localhost:1236/api/games/$GAME_ID/players/$PLAYER_ID/moves" \
           -H "Content-Type: application/json" \
-          -d "{\"position\": \"$position\", \"value\": \"$correct_value\"}")
-        
-        # Check if move was successful
-        if [[ $RESPONSE == *"CORRECT_MOVE"* ]] || [[ $RESPONSE == *"COMPLETED"* ]]; then
-            echo -e "${COLOR}✓ HIT! $PLAYER correctly placed $correct_value at $position${NC}"
-            # Update current grid
-            CURRENT_GRID="${CURRENT_GRID:0:$i}${correct_value}${CURRENT_GRID:$((i+1))}"
-            print_board "$CURRENT_GRID"
-            
-            if [ "$PLAYER" == "Player 1" ]; then
-                ((PLAYER1_SCORE++))
-            else
-                ((PLAYER2_SCORE++))
-            fi
-            
-            echo -e "\nCurrent Scores:"
-            echo -e "${GREEN}Player 1: $PLAYER1_SCORE${NC}"
-            echo -e "${BLUE}Player 2: $PLAYER2_SCORE${NC}"
-            
-            if [[ $RESPONSE == *"COMPLETED"* ]]; then
-                echo -e "\n${COLOR}🏆 $PLAYER completed the puzzle!${NC}"
-                break
-            fi
-        fi
-        
+          -d "{\"position\": \"$position\", \"value\": \"$correct_value\"}" \
+          2>/dev/null)
+
+          # Parse the response
+          VALIDITY=$(echo $RESPONSE | python3 -c "import sys, json; print(json.load(sys.stdin).get('validity', 'INVALID'))")
+
+          if [ "$VALIDITY" == "CORRECT_MOVE" ] || [ "$VALIDITY" == "COMPLETED" ]; then
+              echo -e "${COLOR}✓ HIT! $PLAYER correctly placed $correct_value at $position${NC}"
+
+              # Update grid state with the new move
+              CURRENT_GRID="${CURRENT_GRID:0:$i}${correct_value}${CURRENT_GRID:$((i+1))}"
+              print_board "$CURRENT_GRID"
+
+              # Update scores
+              if [ "$PLAYER" == "Player 1" ]; then
+                  ((PLAYER1_SCORE++))
+              else
+                  ((PLAYER2_SCORE++))
+              fi
+
+              echo -e "\nCurrent Scores:"
+              echo -e "${GREEN}Player 1: $PLAYER1_SCORE${NC}"
+              echo -e "${BLUE}Player 2: $PLAYER2_SCORE${NC}"
+
+              if [ "$VALIDITY" == "COMPLETED" ]; then
+                  echo -e "\n${COLOR}🏆 $PLAYER completed the puzzle!${NC}"
+                  break
+              fi
+          else
+              echo -e "${RED}✗ MISS! $PLAYER failed to place $correct_value at $position ($VALIDITY)${NC}"
+          fi
+
+          # Add a small delay between moves
+          sleep 0.5
+
         sleep 0.5
     fi
 done
