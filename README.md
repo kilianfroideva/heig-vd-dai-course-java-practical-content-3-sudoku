@@ -76,7 +76,6 @@ sudo reboot
 - Open port 1236
 
 
-
 ## Docker Usage
 
 Pull and run the container:
@@ -138,62 +137,63 @@ docker push username/sudoku-app
 - PUT /games/gamesId/players/playersId : Make a move
 - GET /games/gameId : get the actual state of the game
 - app.get("/games", gameController::getAll); GET /games : get all the lobbies
-- 
-### Exemple curl
-
-````bash
-curl -X POST https://supersudoku.duckdns.org:1236/games \
--t 'type:SUDOKU_9X9' \
--d 'difficulty:MEDIUM'
-````
+-
 
 
-## Game Commands
+### Game Commands curl
 
 ### 1. Start Game
 ```bash
-PLAY <grid_size>
+curl -s -X POST http://localhost:1236/api/games \
+  -H "Content-Type: application/json" \
+  -d '{"type": "SUDOKU_9X9", "difficulty": MEDIUM}')
 ```
-- Supported grid sizes: 9, 16
-- Response: `OK` or `ERROR`
 
 ### 2. Make Move
 ```bash
-SELECT <case_name> <number>
+curl -s -X POST "http://localhost:1236/api/games/$GAME_ID/players/$PLAYER1_ID/moves" \
+  -H "Content-Type: application/json" \
+  -d '{"position": "A1", "value": "1"}' | python3 -m json.tool  -d '{"position": "A1", "value": "1"}' | python3 -m json.tool
+
 ```
-- Case names for 9x9 grid: A1 to I9
-- Case names for 16x16 grid: A1 to P16
-- Responses:
-    - `CORRECT MOVE`
-    - `WRONG MOVE`
-    - `ALREADY PLACED` : There is a fixed number at the selected case
-    - `OUT OF BOUNDS` : Choose a case in the grid and a number equal or smaller to the grid size
 
-### 3. Additional Commands
-- `HELP`: Display available commands
-- `QUIT`: Exit game
+### Join lobby 
+```bash
+curl -s -X POST "http://localhost:1236/api/games/$GAME_ID/join" \
+-H "Content-Type: application/json" \
+-d '{"name": "Player 1"}')
+```
+### Get all lobbys:
+````bash
+curl -s -X GET http://localhost:1236/api/games | python3 -m json.tool
+````
 
+### Get a specific game 
+````bash
+curl -s -X GET "http://localhost:1236/api/games/$GAME_ID" | python3 -m json.tool
+````
+
+### get Status
+````bash
+curl -s -X GET "http://localhost:1236/api/games/$GAME_ID" | python3 -m json.tool
+````
+`
 ## Game Flow
 
 1. Connect to server
-2. Request grid size with `PLAY`
-3. Make moves using `SELECT`
+2. Request grid size with the size and the difficulty
+3. Make moves using the position and the value
 4. Receive move validation
-5. Complete game when all cells are correctly filled
+5. Complete game when all cells are correctly filled, the first to finish in the lobby wins
 
-## Error Handling
-
-- Invalid grid size
-- Out-of-bounds moves
-- Selecting pre-filled cells
-- Incorrect number placements
-- Use command Select before starting a game
 
 ## Example Interaction
 
 ```bash
-[Client] PLAY 9
-[Server] OK
+[Client] curl -s -X POST http://localhost:1236/api/games \
+  -H "Content-Type: application/json" \
+  -d '{"type": "SUDOKU_9X9", "difficulty": MEDIUM}')
+[Server] 201 CREATED
 
      1 2 3   4 5 6   7 8 9
     ----------------------
@@ -209,8 +209,10 @@ G  |       | 9     | 8 3
 H  |       |     6 |     7
 I  |     8 |     1 |   4 2
 
-[Client] SELECT A1 1
-[Server] CORRECT MOVE
+[Client] curl -s -X POST "http://localhost:1236/api/games/$GAME_ID/players/$PLAYER1_ID/moves" \
+  -H "Content-Type: application/json" \
+  -d '{"position": "A1", "value": "1"}' | python3 -m json.tool  -d '{"position": "A1", "value": "1"}' | python3 -m json.tool
+[Server] 200 OK
      1 2 3   4 5 6   7 8 9
     ----------------------
 A  | 1 7   | 8     | 2    
@@ -225,8 +227,10 @@ G  |       | 9     | 8 3
 H  |       |     6 |     7
 I  |     8 |     1 |   4 2
 
-[Client] SELECT C1 1
-[Server] WRONG MOVE
+[Client] curl -s -X POST "http://localhost:1236/api/games/$GAME_ID/players/$PLAYER1_ID/moves" \
+  -H "Content-Type: application/json" \
+  -d '{"position": "C1", "value": "1"}' | python3 -m json.tool  -d '{"position": "C1", "value": "1"}' | python3 -m json.tool
+[Server] 400 BAD REQUEST
 
      1 2 3   4 5 6   7 8 9
     ----------------------
